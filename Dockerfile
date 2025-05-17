@@ -5,18 +5,18 @@ RUN apt update && \
     apt install -y curl wget python3 ca-certificates && \
     apt clean
 
-# Download and install sshx directly
-RUN wget https://github.com/ekzhang/sshx/archive/refs/tags/v0.4.1.zip \
-    -O /usr/local/bin/sshx && \
-    chmod +x /usr/local/bin/sshx
+# Install sshx
+RUN curl -sSf https://sshx.io/get | sh
 
-# Create dummy web content to keep the Render service alive
+# Move sshx to a directory in PATH
+RUN mv sshx /usr/local/bin/sshx && chmod +x /usr/local/bin/sshx
+
+# Create a dummy web server directory
 WORKDIR /app
-RUN echo "SSHX is running..." > index.html
+RUN echo "SSHX session running..." > index.html
 
-# Render requires at least one open port to keep the service alive
+# Expose port 8080 to keep the container alive
 EXPOSE 8080
 
-# Start dummy HTTP server and sshx (foreground process)
-CMD python3 -m http.server 8080 & \
-    sshx serve --once
+# Start a dummy HTTP server and launch sshx
+CMD python3 -m http.server 8080 & sshx serve --once
